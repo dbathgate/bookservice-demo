@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookservice
+  labels:
+    app: bookservice
+spec:
+  ports:
+  - port: 8080
+    name: http
+  selector:
+    app: bookservice
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: bookservice-v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bookservice
+        deploy_state: blue
+      annotations:
+        prometheus.io/scrape: true
+    spec:
+      containers:
+      - name: details
+        image: localhost:5000/book-service:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: bookservice-api
+          containerPort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: bookservice-v2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bookservice
+        deploy_state: green
+      annotations:
+        prometheus.io/scrape: true
+    spec:
+      containers:
+      - name: details
+        image: localhost:5000/book-service:v2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: bookservice-api
+          containerPort: 8080
