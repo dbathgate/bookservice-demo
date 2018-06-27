@@ -1,24 +1,3 @@
-def getPreviousVersionNumber() {
-    return sh (
-        script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
-        returnStdOut: true
-    ).trim()
-}
-
-def getPreviousVersionName() {
-    return sh (
-        script: 'kubectl get deployments -l app=bookservice -o name',
-        returnStdOut: true
-    ).trim()
-}
-
-def isPreviousVersionActive() {
-    return sh (
-        script: 'kubectl get deployments -l app=bookservice | wc -l',
-        returnStdOut: true
-    ).trim() > 0
-} 
-
 pipeline {
     agent any
     stages {
@@ -46,7 +25,12 @@ pipeline {
                 sh "kubectl apply -f bookservice-service.yml"
                 sh "kubectl apply -f bookservice-istio-install.yml"
 
-                if (!isPreviousVersionActive()) {
+                def isPreviousVersionActive = return sh (
+                    script: 'kubectl get deployments -l app=bookservice | wc -l',
+                    returnStdOut: true
+                ).trim() > 0
+
+                if (!isPreviousVersionActive) {
                     sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                     sh "kubectl apply -f bookservice-istio-route_template.yml"
                     return
@@ -56,8 +40,15 @@ pipeline {
 
         stage("Canary") {
             steps {
-                def previousVersion = getPreviousVersionNumber()
-                def previousVersionName = getPreviousVersionName()
+                def previousVersion = return sh (
+                    script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
+                    returnStdOut: true
+                ).trim()
+
+                def previousVersionName = sh (
+                    script: 'kubectl get deployments -l app=bookservice -o name',
+                    returnStdOut: true
+                ).trim()
 
                 sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                 sh "kubectl apply -f bookservice-istio-route_template.yml"
