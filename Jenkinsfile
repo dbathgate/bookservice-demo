@@ -25,7 +25,7 @@ pipeline {
                         script: 'kubectl get deployments -l app=bookservice -o name | wc -l',
                         returnStdOut: true
                     )
-                    return env.VERSION_COUNT == 0
+                    return env.VERSION_COUNT.toInteger() == 0
                 }
             }
             steps {
@@ -47,7 +47,7 @@ pipeline {
         stage('Canary') {
             when {
                 expression {
-                    env.VERSION_COUNT > 0
+                    env.VERSION_COUNT.toInteger() > 0
                 }
             }
             steps {
