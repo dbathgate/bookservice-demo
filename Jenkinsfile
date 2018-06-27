@@ -25,12 +25,15 @@ pipeline {
                 sh "kubectl apply -f bookservice-service.yml"
                 sh "kubectl apply -f bookservice-istio-install.yml"
 
-                def isPreviousVersionActive = sh (
-                    script: 'kubectl get deployments -l app=bookservice | wc -l',
-                    returnStdOut: true
-                ).trim() > 0
+            }
 
-                if (!isPreviousVersionActive) {
+            def isPreviousVersionActive = sh (
+                script: 'kubectl get deployments -l app=bookservice | wc -l',
+                returnStdOut: true
+            ).trim() > 0
+
+            if (!isPreviousVersionActive) {
+                steps {
                     sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                     sh "kubectl apply -f bookservice-istio-route_template.yml"
                     return
@@ -39,16 +42,17 @@ pipeline {
         }
 
         stage("Canary") {
-            steps {
-                def previousVersion = sh (
+            def previousVersion = sh (
                     script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
                     returnStdOut: true
                 ).trim()
 
-                def previousVersionName = sh (
-                    script: 'kubectl get deployments -l app=bookservice -o name',
-                    returnStdOut: true
-                ).trim()
+            def previousVersionName = sh (
+                script: 'kubectl get deployments -l app=bookservice -o name',
+                returnStdOut: true
+            ).trim()
+
+            steps {
 
                 sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                 sh "kubectl apply -f bookservice-istio-route_template.yml"
