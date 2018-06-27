@@ -23,8 +23,8 @@ pipeline {
                 expression {
                     env.VERSION_COUNT = sh (
                         script: 'kubectl get deployments -l app=bookservice -o name | wc -l',
-                        returnStdOut: true
-                    )
+                        returnStdout: true
+                    ).trim()
                     return env.VERSION_COUNT.toInteger() == 0
                 }
             }
@@ -55,12 +55,12 @@ pipeline {
                 script {
                     env.PREVIOUS_VERSION_NUMBER = sh (
                         script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
-                        returnStdOut: true
+                        returnStdout: true
                     ).trim()
 
                     env.PREVIOUS_VERSION_NAME = sh (
                         script: 'kubectl get deployments -l app=bookservice -o name',
-                        returnStdOut: true
+                        returnStdout: true
                     ).trim()
                 }
 
