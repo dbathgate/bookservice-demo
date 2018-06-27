@@ -13,8 +13,8 @@ pipeline {
         }
         stage("Docker Push"){
             steps {
-                sh "docker tag book-service:${env.BUILD_ID} 172.17.0.1:5000/book-service:${env.BUILD_ID}"
-                sh "docker push 172.17.0.1:5000/book-service:${env.BUILD_ID}"
+                sh "docker tag book-service:${env.BUILD_ID} localhost:5000/book-service:${env.BUILD_ID}"
+                sh "docker push localhost:5000/book-service:${env.BUILD_ID}"
             }
         }
         stage("k8s Deploy") {
