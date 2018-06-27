@@ -54,7 +54,7 @@ pipeline {
 
                 script {
                     env.PREVIOUS_VERSION_NUMBER = sh (
-                        script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"'
+                        script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
                         returnStdOut: true
                     ).trim()
 
