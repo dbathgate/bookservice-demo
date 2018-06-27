@@ -39,15 +39,16 @@ pipeline {
 
             when {
                 expression {
-                    sh (
+                    VERSION_COUNT = sh (
                         script: 'kubectl get deployments -l app=bookservice | wc -l',
                         returnStdOut: true
-                    ).trim() == 0
-                } steps {
-                    sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
-                    sh "kubectl apply -f bookservice-istio-route_template.yml"
-                    return
+                    )
+                    return VERSION_COUNT == 0
                 }
+            } steps {
+                sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
+                sh "kubectl apply -f bookservice-istio-route_template.yml"
+                return
             }
         }
 
