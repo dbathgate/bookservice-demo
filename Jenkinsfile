@@ -17,6 +17,23 @@ pipeline {
                 sh "docker push localhost:5000/book-service:${env.BUILD_ID}"
             }
         }
+
+        stage ('Istio Initial Setup') {
+            when {
+                expression {
+                    env.VERSION_COUNT = sh (
+                        script: 'kubectl get deployments -l app=bookservice -o name | wc -l',
+                        returnStdOut: true
+                    )
+                    return env.VERSION_COUNT == 0
+                }
+            }
+            steps {
+                sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
+                sh "kubectl apply -f bookservice-istio-route_template.yml"
+            }
+        }
+
         stage('k8s Deploy') {
             steps {
 
@@ -27,34 +44,30 @@ pipeline {
             }
         }
 
-        stage ('Istio Initial Setup') {
-            when {
-                expression {
-                    VERSION_COUNT = sh (
-                        script: 'kubectl get deployments -l app=bookservice | wc -l',
-                        returnStdOut: true
-                    )
-                    return VERSION_COUNT == 0
-                }
-            }
-            steps {
-                sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
-                sh "kubectl apply -f bookservice-istio-route_template.yml"
-            }
-        }
-
         stage('Canary') {
             when {
                 expression {
-                    VERSION_COUNT > 0
+                    env.VERSION_COUNT > 0
                 }
             }
             steps {
 
+                script {
+                    env.PREVIOUS_VERSION_NUMBER = sh (
+                        script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"'
+                        returnStdOut: true
+                    ).trim()
+
+                    env.PREVIOUS_VERSION_NAME = sh (
+                        script: 'kubectl get deployments -l app=bookservice -o name',
+                        returnStdOut: true
+                    ).trim()
+                }
+
                 sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                 sh "kubectl apply -f bookservice-istio-route_template.yml"
 
-                sh "kubectl delete ${previousVersionName}"
+                sh "kubectl delete ${env.PREVIOUS_VERSION_NAME}"
             }
         
         }
