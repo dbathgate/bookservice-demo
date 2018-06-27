@@ -8,9 +8,19 @@ pipeline {
         }
         stage("Docker Image"){
             steps {
-                script {
-                    docker.build("book-service:${env.BUILD_ID}")
-                }
+                sh "docker build -t book-service:${env.BUILD_ID} ."
+            }
+        }
+        stage("Docker Push"){
+            steps {
+                sh "docker tag book-service:${env.BUILD_ID} 172.17.0.1:5000/book-service:${env.BUILD_ID}"
+                sh "docker push 172.17.0.1:5000/book-service:${env.BUILD_ID}"
+            }
+        }
+        stage("k8s Deploy") {
+            steps {
+                sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" ./bookservice-install.1.yml"
+                sh "kubectl apply -f <(istioctl kube-inject -f bookservice-install.1.yml)"
             }
         }
     }
