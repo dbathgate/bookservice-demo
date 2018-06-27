@@ -8,7 +8,9 @@ pipeline {
         }
         stage("Docker Image"){
             steps {
-                docker.build("book-service:${env.BUILD_ID}")
+                script {
+                    docker.build("book-service:${env.BUILD_ID}")
+                }
             }
         }
     }
