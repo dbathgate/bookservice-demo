@@ -1,15 +1,15 @@
 pipeline {
     agent any
 
-    def previousVersion = sh (
-        script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
-        returnStdOut: true
-    ).trim()
+    // def previousVersion = sh (
+    //     script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
+    //     returnStdOut: true
+    // ).trim()
 
-    def previousVersionName = sh (
-        script: 'kubectl get deployments -l app=bookservice -o name',
-        returnStdOut: true
-    ).trim()
+    // def previousVersionName = sh (
+    //     script: 'kubectl get deployments -l app=bookservice -o name',
+    //     returnStdOut: true
+    // ).trim()
 
     stages {
         stage("Build"){
@@ -34,12 +34,12 @@ pipeline {
                 sh "sed -i \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-install_template.yml"
                 sh "istioctl kube-inject -f bookservice-install_template.yml > bookservice-istio-install.yml"
                 sh "kubectl apply -f bookservice-service.yml"
-                sh "kubectl apply -f bookservice-istio-install.yml" d
+                sh "kubectl apply -f bookservice-istio-install.yml"
             }
 
             when {
                 expression {
-                    return sh (
+                    sh (
                         script: 'kubectl get deployments -l app=bookservice | wc -l',
                         returnStdOut: true
                     ).trim() == 0
