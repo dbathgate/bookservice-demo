@@ -36,7 +36,9 @@ pipeline {
                 sh "kubectl apply -f bookservice-service.yml"
                 sh "kubectl apply -f bookservice-istio-install.yml"
             }
+        }
 
+        stage ("Istio Initial Setup") {
             when {
                 expression {
                     VERSION_COUNT = sh (
