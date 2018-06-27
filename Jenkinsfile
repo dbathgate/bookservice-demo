@@ -1,16 +1,5 @@
 pipeline {
     agent any
-
-    // def previousVersion = sh (
-    //     script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
-    //     returnStdOut: true
-    // ).trim()
-
-    // def previousVersionName = sh (
-    //     script: 'kubectl get deployments -l app=bookservice -o name',
-    //     returnStdOut: true
-    // ).trim()
-
     stages {
         stage("Build"){
             steps {
@@ -38,7 +27,7 @@ pipeline {
             }
         }
 
-        stage ("Istio Initial Setup") {
+        stage ('Istio Initial Setup') {
             when {
                 expression {
                     VERSION_COUNT = sh (
@@ -47,7 +36,8 @@ pipeline {
                     )
                     return VERSION_COUNT == 0
                 }
-            } steps {
+            }
+            steps {
                 sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                 sh "kubectl apply -f bookservice-istio-route_template.yml"
                 return
