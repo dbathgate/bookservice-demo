@@ -22,7 +22,7 @@ spec:
     metadata:
       labels:
         app: bookservice
-        deploy_state: blue
+        version: %%BUILD_NUMBER%%
       annotations:
         prometheus.io/scrape: true
     spec:
@@ -33,3 +33,6 @@ spec:
         ports:
         - name: bookservice-api
           containerPort: 8080
+        env:
+        - name: JVM_ARGS
+          value: -Dapp.version=%%BUILD_NUMBER%%
