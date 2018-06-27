@@ -25,7 +25,7 @@ pipeline {
                 sh "kubectl apply -f bookservice-service.yml"
                 sh "kubectl apply -f bookservice-istio-install.yml"
 
-                def isPreviousVersionActive = return sh (
+                def isPreviousVersionActive = sh (
                     script: 'kubectl get deployments -l app=bookservice | wc -l',
                     returnStdOut: true
                 ).trim() > 0
@@ -40,7 +40,7 @@ pipeline {
 
         stage("Canary") {
             steps {
-                def previousVersion = return sh (
+                def previousVersion = sh (
                     script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
                     returnStdOut: true
                 ).trim()
