@@ -20,7 +20,8 @@ pipeline {
         stage("k8s Deploy") {
             steps {
                 sh "sed -i \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" ./bookservice-install.1.yml"
-                sh "kubectl apply -f <\(istioctl kube-inject -f bookservice-install.1.yml\)"
+                sh "istioctl kube-inject -f bookservice-install.1.yml > bookservice-istio-install.yml"
+                sh "kubectl apply -f bookservice-istio-install.yml"
             }
         }
     }
