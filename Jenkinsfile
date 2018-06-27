@@ -29,7 +29,7 @@ pipeline {
                 }
             }
             steps {
-                sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
+                sh "sed -i \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                 sh "kubectl apply -f bookservice-istio-route_template.yml"
             }
         }
@@ -64,7 +64,7 @@ pipeline {
                     ).trim()
                 }
 
-                sh "sed \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
+                sh "sed -i \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                 sh "kubectl apply -f bookservice-istio-route_template.yml"
 
                 sh "kubectl delete ${env.PREVIOUS_VERSION_NAME}"
