@@ -36,6 +36,19 @@ pipeline {
 
         stage('k8s Deploy') {
             steps {
+                script {
+
+                    env.PREVIOUS_VERSION_NUMBER = sh (
+                        script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\\"//g"',
+                        returnStdout: true
+                    ).trim()
+
+                    env.PREVIOUS_VERSION_NAME = sh (
+                        script: "kubectl get deployments -l app=bookservice,version=${env.PREVIOUS_VERSION_NUMBER} -o name",
+                        returnStdout: true
+                    ).trim()
+
+                }
 
                 sh "sed -i \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-install_template.yml"
                 sh "istioctl kube-inject -f bookservice-install_template.yml > bookservice-istio-install.yml"
@@ -53,15 +66,29 @@ pipeline {
             steps {
 
                 script {
-                    env.PREVIOUS_VERSION_NUMBER = sh (
-                        script: 'kubectl get deployments -l app=bookservice -o json | jq ".items[].spec.template.metadata.labels.version" | sed "s/\"//g"',
-                        returnStdout: true
-                    ).trim()
+                    def finishDeployment = false
 
-                    env.PREVIOUS_VERSION_NAME = sh (
-                        script: 'kubectl get deployments -l app=bookservice -o name',
-                        returnStdout: true
-                    ).trim()
+                    while(!finishDeployment) {
+
+                        userInput = input(
+                            id: 'Proceed', message: 'Proceed Deployment?', parameters: [
+                            [$class: 'TextParameterDefinition', defaultValue: "0", description: '', name: 'Increase Traffic?'],
+                            [$class: 'BooleanParameterDefinition', defaultValue: false, description: '', name: 'Complete Deployment?']
+                        ])
+
+                        finishDeployment = userInput["Complete Deployment?"]
+                        def greenPercentage = userInput["Increase Traffic?"].toInteger()
+                        def bluePercentage = 100 - greenPercentage;
+
+                        if (!finishDeployment) {
+                            sh "cp bookservice-canary_template.yml bookservice-canary.yml"
+                            sh "sed -i \"s/%%BLUE_VERSION%%/${env.PREVIOUS_VERSION_NUMBER}/g\" bookservice-canary.yml"
+                            sh "sed -i \"s/%%GREEN_VERSION%%/${env.BUILD_ID}/g\" bookservice-canary.yml"
+                            sh "sed -i \"s/%%BLUE_PERCENT%%/${bluePercentage}/g\" bookservice-canary.yml"
+                            sh "sed -i \"s/%%GREEN_PERCENT%%/${greenPercentage}/g\" bookservice-canary.yml"
+                            sh "kubectl apply -f bookservice-canary.yml"
+                        }
+                    }
                 }
 
                 sh "sed -i \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"

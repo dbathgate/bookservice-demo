@@ -8,10 +8,10 @@ spec:
   subsets:
   - name: blue
     labels:
-      version: %%BLUE_VERSION%%
+      version: "%%BLUE_VERSION%%"
   - name: green
     labels:
-      deploy_state: %%GREEN_VERSION%%
+      version: "%%GREEN_VERSION%%"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
