@@ -29,11 +29,11 @@ public class BookController {
     @RequestMapping(value="/books", method = RequestMethod.GET)
     @Timed(name="getBooksTimer")
     public ResponseEntity<List<BookDto>> getBook() {
-        getBooksCounter.labels("getBooks", "GET", "500").inc();
+        getBooksCounter.labels("getBooks", "GET", "200").inc();
         List<BookDto> books = new ArrayList<>();
 
         books.add(new BookDto("1", "Book One", "me", Arrays.asList("horror")));
 
-        return ResponseEntity.status(500).build();
+        return ResponseEntity.ok().body(books);
     }
 }
