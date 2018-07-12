@@ -9,18 +9,18 @@ public class BookDto {
     private String id;
     private String title;
     private String author;
-    private List<String> genre;
+    private List<String> category;
 
     @JsonCreator
     public BookDto(@JsonProperty("id") String id,
     @JsonProperty("title") String title,
     @JsonProperty("author") String author,
-    @JsonProperty("genre") List<String> genre) {
+    @JsonProperty("category") List<String> category) {
 
         this.id = id;
         this.title = title;
         this.author = author;
-        this.genre = genre;
+        this.category = category;
     }
 
     /**
@@ -38,10 +38,10 @@ public class BookDto {
     }
 
     /**
-     * @return the genre
+     * @return the category
      */
-    public List<String> getGenre() {
-        return genre;
+    public List<String> getCategory() {
+        return category;
     }
 
     /**

@@ -32,7 +32,10 @@ public class BookController {
         getBooksCounter.labels("getBooks", "GET", "200").inc();
         List<BookDto> books = new ArrayList<>();
 
-        books.add(new BookDto("1", "Book One", "me", Arrays.asList("horror")));
+        books.add(new BookDto("1", "Building a Monolith", "Dr. B", Arrays.asList("software architecture", "microservices")));
+        books.add(new BookDto("2", "Security As an After Thought (SAAAT)", "Dr. B", Arrays.asList("security")));
+        books.add(new BookDto("3", "Exiting vi Using a Touchbar Macbook", "Dr. B", Arrays.asList("vi", "macbook")));
+        books.add(new BookDto("4", "Changing Grafana to Light Mode", "Dr. B", Arrays.asList("grafana", "light mode")));
 
         return ResponseEntity.ok().body(books);
     }

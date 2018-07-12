@@ -1,7 +1,5 @@
 package com.kenzan.canary.bookservice.controller;
 
-import javax.annotation.PostConstruct;
-
 import com.kenzan.canary.bookservice.dto.VersionInfoDto;
 
 import org.springframework.beans.factory.annotation.Autowired;
