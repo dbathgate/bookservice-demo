@@ -73,10 +73,12 @@ pipeline {
                         userInput = input(
                             id: 'Proceed', message: 'Proceed Deployment?', parameters: [
                             [$class: 'TextParameterDefinition', defaultValue: "0", description: '', name: 'Increase Traffic?'],
-                            [$class: 'BooleanParameterDefinition', defaultValue: false, description: '', name: 'Complete Deployment?']
+                            [$class: 'BooleanParameterDefinition', defaultValue: false, description: '', name: 'Proceed Deployment?'],
+                            [$class: 'BooleanParameterDefinition', defaultValue: false, description: '', name: 'Rollback Deployment?']
                         ])
 
-                        finishDeployment = userInput["Complete Deployment?"]
+                        finishDeployment = userInput["Proceed Deployment?"] || userInput["Rollback Deployment?"]
+                        def rollbackDeployment = userInput["Rollback Deployment?"]
                         def greenPercentage = userInput["Increase Traffic?"].toInteger()
                         def bluePercentage = 100 - greenPercentage;
 
@@ -88,15 +90,39 @@ pipeline {
                             sh "sed -i \"s/%%GREEN_PERCENT%%/${greenPercentage}/g\" bookservice-canary.yml"
                             sh "kubectl apply -f bookservice-canary.yml"
                         }
+                        env.PROCEED_DEPLOYMENT = userInput["Proceed Deployment?"]
+                        env.ROLLBACK_DEPLOYMENT = userInput["Rollback Deployment?"]
                     }
                 }
-
+            }
+        
+        }
+        stage('Proceed Deployment') {
+            when{ 
+                expression {
+                    env.VERSION_COUNT.toInteger() > 0 && env.PROCEED_DEPLOYMENT == "true"
+                }
+            }
+            steps {
                 sh "sed -i \"s/%%BUILD_NUMBER%%/${env.BUILD_ID}/g\" bookservice-istio-route_template.yml"
                 sh "kubectl apply -f bookservice-istio-route_template.yml"
 
                 sh "kubectl delete ${env.PREVIOUS_VERSION_NAME}"
             }
-        
+        }
+
+        stage('Rollback Deployment') {
+            when{ 
+                expression {
+                    env.VERSION_COUNT.toInteger() > 0 && env.ROLLBACK_DEPLOYMENT == "true"
+                }
+            }
+            steps {
+                sh "sed -i \"s/%%BUILD_NUMBER%%/${env.PREVIOUS_VERSION_NUMBER}/g\" bookservice-istio-route_template.yml"
+                sh "kubectl apply -f bookservice-istio-route_template.yml"
+
+                sh "kubectl delete deployment bookservice-${env.BUILD_ID}"
+            }
         }
     }
     post { 

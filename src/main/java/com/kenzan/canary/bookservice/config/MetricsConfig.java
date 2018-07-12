@@ -1,6 +1,5 @@
 package com.kenzan.canary.bookservice.config;
 
-import com.ryantenney.metrics.spring.config.annotation.MetricsConfigurerAdapter;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -13,7 +12,7 @@ import io.prometheus.client.exporter.MetricsServlet;
 import io.prometheus.client.hotspot.DefaultExports;
 
 @Configuration
-public class MetricsConfig extends MetricsConfigurerAdapter{
+public class MetricsConfig {
 
     @Value("${app.version:1.0}")
     private String appVersion;

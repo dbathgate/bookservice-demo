@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
-import com.codahale.metrics.annotation.Timed;
 import com.kenzan.canary.bookservice.dto.BookDto;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +24,6 @@ public class BookController {
     private Counter getBooksCounter;
 
     @RequestMapping(value="/books", method = RequestMethod.GET)
-    @Timed(name="getBooksTimer")
     public ResponseEntity<List<BookDto>> getBook() {
         getBooksCounter.labels("getBooks", "GET", "200").inc();
         List<BookDto> books = new ArrayList<>();
