@@ -29,7 +29,7 @@ public class BookController {
     @RequestMapping(value="/books", method = RequestMethod.GET)
     @Timed(name="getBooksTimer")
     public ResponseEntity<List<BookDto>> getBook() {
-        getBooksCounter.labels("getBooks", "GET", "200").inc();
+        getBooksCounter.labels("getBooks", "GET", "500").inc();
         List<BookDto> books = new ArrayList<>();
 
         books.add(new BookDto("1", "Building a Monolith", "Dr. B", Arrays.asList("software architecture", "microservices")));
@@ -37,6 +37,6 @@ public class BookController {
         books.add(new BookDto("3", "Exiting vi Using a Touchbar Macbook", "Dr. B", Arrays.asList("vi", "macbook")));
         books.add(new BookDto("4", "Changing Grafana to Light Mode", "Dr. B", Arrays.asList("grafana", "light mode")));
 
-        return ResponseEntity.ok().body(books);
+        return ResponseEntity.status(500).build();
     }
 }
