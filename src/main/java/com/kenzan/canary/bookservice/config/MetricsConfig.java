@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.MetricsServlet;
-import io.prometheus.client.hotspot.DefaultExports;
 
 @Configuration
 public class MetricsConfig {
@@ -19,7 +18,6 @@ public class MetricsConfig {
 
     @Bean
     public ServletRegistrationBean<MetricsServlet> getMetricServlet(){
-        DefaultExports.initialize();
 
         Gauge metadataGauge = Gauge.build()
             .name("app_metadata")
