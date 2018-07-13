@@ -35,7 +35,6 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 
 	compile ('io.prometheus:simpleclient:0.4.0')
-	compile ('io.prometheus:simpleclient_hotspot:0.4.0')
 	compile ('io.prometheus:simpleclient_servlet:0.4.0')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
