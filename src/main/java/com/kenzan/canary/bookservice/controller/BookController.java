@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import com.kenzan.canary.bookservice.dto.BookDto;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.prometheus.client.Counter;
+import io.prometheus.client.Gauge;
 
 
 @RestController
@@ -22,6 +25,17 @@ public class BookController {
     @Autowired()
     @Qualifier("getHttpRequestsTotalCounter")
     private Counter getBooksCounter;
+
+    private Gauge bookGauge;
+
+    @PostConstruct
+    public void init() {
+
+        bookGauge = Gauge.build()
+            .name("book_gauge")
+            .help("Number of books")
+            .register();
+    }
 
     @RequestMapping(value="/books", method = RequestMethod.GET)
     public ResponseEntity<List<BookDto>> getBook() {
@@ -34,10 +48,13 @@ public class BookController {
             books.add(new BookDto("4", "Changing Grafana to Light Mode", "Dr. B", Arrays.asList("grafana", "light mode")));
 
             getBooksCounter.labels("getBooks", "GET", "200").inc();
+            bookGauge.set(books.size());
+
             return ResponseEntity.ok().body(books);
 
         } catch (Exception e) {
             getBooksCounter.labels("getBooks", "GET", "500").inc();
+            bookGauge.set(0);
             return ResponseEntity.status(500).build();
         }
     }
