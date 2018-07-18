@@ -40,13 +40,13 @@ public class BookController {
     @RequestMapping(value="/books", method = RequestMethod.GET)
     public ResponseEntity<List<BookDto>> getBook() {
         try {
-            List<BookDto> books = new ArrayList<>();
+            List<BookDto> books = null;
 
             books.add(new BookDto("1", "Building a Monolith", "Dr. B", Arrays.asList("software architecture", "microservices")));
             books.add(new BookDto("2", "Security As an After Thought (SAAAT)", "Dr. B", Arrays.asList("security")));
             books.add(new BookDto("3", "Exiting vi Using a Touchbar Macbook", "Dr. B", Arrays.asList("vi", "macbook")));
             books.add(new BookDto("4", "Changing Grafana to Light Mode", "Dr. B", Arrays.asList("grafana", "light mode")));
-            // books.add(new BookDto("5", "Presenting at OSCON", "Dr. B", Arrays.asList("oscon")));
+            books.add(new BookDto("5", "Presenting at OSCON", "Dr. B", Arrays.asList("oscon")));
 
             getBooksCounter.labels("getBooks", "GET", "200").inc();
             bookGauge.set(books.size());
